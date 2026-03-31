@@ -69,7 +69,6 @@ async def _run_claude(prompt: str, model: str) -> dict:
     cmd = [
         "claude", "-p",
         "--model", model,
-        "--bare",
         "--tools", "",
         "--system-prompt", SYSTEM_PROMPT,
         "--output-format", "json",
