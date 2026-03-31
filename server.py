@@ -14,7 +14,7 @@ from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from sse_starlette.sse import EventSourceResponse
 
-from ai_client import generate_content
+from ai_client import generate_content, log_ai_config
 from url_fetcher import fetch_url
 
 # ── Config ──────────────────────────────────────────────────────────
@@ -28,6 +28,7 @@ logging.basicConfig(
     format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
 )
 logger = logging.getLogger("repurposebot")
+log_ai_config()
 
 # ── FastAPI app ─────────────────────────────────────────────────────
 app = FastAPI(title="RepurposeBot API", version="1.0.0")

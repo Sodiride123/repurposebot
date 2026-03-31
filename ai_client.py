@@ -38,9 +38,9 @@ def _get_subprocess_env() -> dict:
     env = os.environ.copy()
     settings = _load_settings()
     settings_env = settings.get("env", {})
-    # Inject settings env vars into subprocess env (settings take precedence)
+    # Inject settings env vars into subprocess env (settings override os env)
     for key, val in settings_env.items():
-        if val and key not in env:
+        if val:
             env[key] = val
     # Ensure HOME is set (supervisor may strip it)
     env.setdefault("HOME", str(Path.home()))
@@ -48,7 +48,17 @@ def _get_subprocess_env() -> dict:
 
 
 PRIMARY_MODEL, FALLBACK_MODEL = _get_models()
-logger.info(f"AI models configured: primary={PRIMARY_MODEL}, fallback={FALLBACK_MODEL}")
+
+
+def log_ai_config():
+    """Log AI configuration (call after logging is configured)."""
+    env = _get_subprocess_env()
+    logger.info(
+        f"AI config: model={PRIMARY_MODEL}, "
+        f"HOME={env.get('HOME', 'MISSING')}, "
+        f"ANTHROPIC_BASE_URL={'set' if env.get('ANTHROPIC_BASE_URL') else 'MISSING'}, "
+        f"ANTHROPIC_AUTH_TOKEN={'set' if env.get('ANTHROPIC_AUTH_TOKEN') else 'MISSING'}"
+    )
 
 
 async def _run_claude(prompt: str, model: str) -> dict:
@@ -80,12 +90,17 @@ async def _run_claude(prompt: str, model: str) -> dict:
         )
 
         stdout_text = stdout.decode("utf-8", errors="replace").strip()
+        stderr_text = stderr.decode("utf-8", errors="replace").strip()
+
+        if stderr_text:
+            logger.warning(f"Claude CLI stderr (model={model}): {stderr_text[:500]}")
 
         if not stdout_text:
+            hint = stderr_text[:200] if stderr_text else "no stderr output"
             return {
                 "success": False,
                 "result": None,
-                "error": f"Empty response from Claude Code (model={model})",
+                "error": f"Empty response from Claude Code (model={model}): {hint}",
                 "duration_ms": 0,
             }
 
