@@ -51,7 +51,6 @@ async def api_fetch_url(request: Request):
     result = await fetch_url(url)
     if result.get("error"):
         return JSONResponse(
-            status_code=422,
             content={"error": result["error"], "text": "", "title": "", "word_count": 0},
         )
     return result

@@ -3,15 +3,52 @@
 import asyncio
 import json
 import logging
+import os
 import re
+from pathlib import Path
 
 from prompts import SYSTEM_PROMPT, build_user_prompt
 
 logger = logging.getLogger(__name__)
 
-PRIMARY_MODEL = "claude-sonnet-4-6"
-FALLBACK_MODEL = "ninja-cline-complex"
 TIMEOUT_SECONDS = 120
+
+
+def _load_settings() -> dict:
+    """Load settings from claude settings files."""
+    for path in ["/dev/shm/claude_settings.json", str(Path.home() / ".claude/settings.json")]:
+        try:
+            return json.loads(Path(path).read_text())
+        except Exception:
+            continue
+    return {}
+
+
+def _get_models() -> tuple[str, str]:
+    """Get primary and fallback model names from settings or env."""
+    settings = _load_settings()
+    env = settings.get("env", {})
+    # ANTHROPIC_MODEL from settings.json env, or OS env, or default
+    model = env.get("ANTHROPIC_MODEL") or os.environ.get("ANTHROPIC_MODEL") or "claude-sonnet-4-6"
+    return model, model  # use same model for both attempts
+
+
+def _get_subprocess_env() -> dict:
+    """Build environment for claude subprocess, ensuring required vars are set."""
+    env = os.environ.copy()
+    settings = _load_settings()
+    settings_env = settings.get("env", {})
+    # Inject settings env vars into subprocess env (settings take precedence)
+    for key, val in settings_env.items():
+        if val and key not in env:
+            env[key] = val
+    # Ensure HOME is set (supervisor may strip it)
+    env.setdefault("HOME", str(Path.home()))
+    return env
+
+
+PRIMARY_MODEL, FALLBACK_MODEL = _get_models()
+logger.info(f"AI models configured: primary={PRIMARY_MODEL}, fallback={FALLBACK_MODEL}")
 
 
 async def _run_claude(prompt: str, model: str) -> dict:
@@ -34,6 +71,7 @@ async def _run_claude(prompt: str, model: str) -> dict:
             stdin=asyncio.subprocess.PIPE,
             stdout=asyncio.subprocess.PIPE,
             stderr=asyncio.subprocess.PIPE,
+            env=_get_subprocess_env(),
         )
 
         stdout, stderr = await asyncio.wait_for(

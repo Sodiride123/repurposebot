@@ -209,21 +209,16 @@ async function processWithAI(text, url) {
     // Step 1: Fetch URL content if needed
     if (url && !text) {
       activate(0, steps); updateProgress(5);
-      try {
-        const res = await fetch('/api/fetch-url', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ url }),
-        });
-        const data = await res.json();
-        if (data.error || !data.text || data.text.length < 50) {
-          throw new Error(data.error || 'Could not extract content from URL');
-        }
-        text = data.text;
-      } catch (fetchErr) {
-        console.warn('Backend URL fetch failed:', fetchErr);
-        throw new Error('Could not fetch URL content. Try pasting the text directly.');
+      const res = await fetch('/api/fetch-url', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (data.error || !data.text || data.text.length < 50) {
+        throw new Error('This URL may be protected or inaccessible. Please open the page in your browser, copy the text content, and paste it in the Text tab instead.');
       }
+      text = data.text;
     }
     complete(0, steps); updateProgress(15);
 
@@ -871,9 +866,18 @@ function setupNewContentButton() {
     document.querySelector('.input-section').style.display = '';
     document.querySelector('.hero').style.display = '';
     $('results-section').classList.remove('active');
+    // Clear all inputs
     const urlInput = $('url-input');
     if (urlInput) urlInput.value = '';
-    State.results = null; State.articleText = '';
+    const textInput = $('text-input');
+    if (textInput) { textInput.value = ''; }
+    const charCount = $('char-count');
+    if (charCount) charCount.textContent = '0 characters';
+    const fileInput = $('file-input');
+    if (fileInput) fileInput.value = '';
+    const dropLabel = $('drop-label');
+    if (dropLabel) dropLabel.textContent = 'Drop a file here or click to browse';
+    State.results = null; State.articleText = ''; State.pendingFile = null;
     window.scrollTo({ top: 0, behavior: 'smooth' });
   });
 }

@@ -250,6 +250,56 @@ async def _direct_fetch(url: str) -> dict | None:
     return {"text": text, "title": title}
 
 
+# ── Browser-based Fetch (Playwright) ─────────────────────────────────
+
+BROWSER_API = "http://127.0.0.1:8002/api/automation"
+
+
+async def _browser_fetch(url: str) -> dict | None:
+    """Fetch URL using headless browser via browser_api service.
+
+    Handles JS-rendered pages and sites that block simple HTTP requests.
+    Returns dict with 'text', 'title' or None on failure.
+    """
+    try:
+        async with httpx.AsyncClient(timeout=30) as client:
+            # Navigate to the URL
+            nav_resp = await client.post(
+                f"{BROWSER_API}/navigate_to",
+                json={"url": url},
+            )
+            if nav_resp.status_code != 200:
+                return None
+
+            nav_data = nav_resp.json()
+            title = nav_data.get("title", "")
+
+            # Wait for JS rendering, then extract content
+            import asyncio
+            await asyncio.sleep(3)
+
+            ext_resp = await client.post(
+                f"{BROWSER_API}/extract_content",
+                json="extract all text",
+            )
+            if ext_resp.status_code != 200:
+                return None
+
+            ext_data = ext_resp.json()
+            text = ext_data.get("content", "") or ""
+            title = ext_data.get("title", "") or title
+
+            # Filter out Cloudflare challenge pages
+            if not text or len(text) < 50 or "just a moment" in title.lower():
+                return None
+
+            logger.info(f"Browser extracted {len(text)} chars from {url}")
+            return {"text": text, "title": title}
+    except Exception as e:
+        logger.warning(f"Browser fetch error: {e}")
+        return None
+
+
 # ── Main Entry Point ──────────────────────────────────────────────────
 
 async def fetch_url(url: str) -> dict:
@@ -258,6 +308,7 @@ async def fetch_url(url: str) -> dict:
     Strategy:
       1. Tavily MCP extract (primary - best quality extraction)
       2. Direct httpx fetch + HTML parsing (fallback)
+      3. Headless browser via browser_api (final fallback)
 
     Returns dict with 'text', 'title', 'word_count' keys.
     """
@@ -274,7 +325,7 @@ async def fetch_url(url: str) -> dict:
             "source": "tavily",
         }
 
-    # Fallback: direct HTTP fetch
+    # Fallback 1: direct HTTP fetch
     logger.info(f"Tavily failed, falling back to direct fetch: {url}")
     result = await _direct_fetch(url)
     if result and result.get("text"):
@@ -285,6 +336,19 @@ async def fetch_url(url: str) -> dict:
             "title": result.get("title", ""),
             "word_count": len(words),
             "source": "direct",
+        }
+
+    # Fallback 2: headless browser
+    logger.info(f"Direct fetch failed, falling back to browser: {url}")
+    result = await _browser_fetch(url)
+    if result and result.get("text"):
+        text = result["text"]
+        words = text.split()
+        return {
+            "text": text,
+            "title": result.get("title", ""),
+            "word_count": len(words),
+            "source": "browser",
         }
 
     return {"text": "", "title": "", "word_count": 0, "error": "Could not fetch URL content"}
