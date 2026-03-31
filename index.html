@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RepurposeBot — Turn Any Article Into 5 Content Formats</title>
+  <meta name="description" content="Paste a URL or upload an article. RepurposeBot auto-generates a LinkedIn carousel, Twitter thread, email newsletter, podcast script, and Instagram captions matched to the original tone." />
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238b5cf6' stroke-width='2'><rect x='3' y='11' width='18' height='10' rx='2'/><circle cx='12' cy='5' r='2'/><path d='M12 7v4'/><circle cx='8' cy='16' r='1' fill='%238b5cf6'/><circle cx='16' cy='16' r='1' fill='%238b5cf6'/></svg>" />
+<script src="https://sites.super.betamyninja.ai/_assets/ninja-daytona-script.js"></script>
+</head>
+<body>
+
+<!-- Background -->
+<div class="bg-orbs">
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+</div>
+
+<!-- Loading Screen -->
+<div id="loading-screen">
+  <div class="loading-rings">
+    <div class="loading-ring ring-1"></div>
+    <div class="loading-ring ring-2"></div>
+    <div class="loading-ring ring-3"></div>
+    <div class="loading-center-icon">
+      <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="11" width="18" height="10" rx="2"/>
+        <circle cx="12" cy="5" r="2"/><path d="M12 7v4"/>
+        <circle cx="8" cy="16" r="1" fill="currentColor" stroke="none"/>
+        <circle cx="16" cy="16" r="1" fill="currentColor" stroke="none"/>
+      </svg>
+    </div>
+  </div>
+
+  <div class="loading-text">
+    <h3>Repurposing Your Content</h3>
+    <p>Analyzing tone, extracting insights, generating formats</p>
+  </div>
+
+  <div class="progress-wrap">
+    <div class="progress-fill"></div>
+  </div>
+
+  <div class="loading-steps">
+    <div class="load-step" id="step-fetch">
+      <div class="step-indicator">
+        <div class="step-dot"></div>
+      </div>
+      Fetching article content
+    </div>
+    <div class="load-step" id="step-analyze">
+      <div class="step-indicator">
+        <div class="step-dot"></div>
+      </div>
+      Analyzing tone & key messages
+    </div>
+    <div class="load-step" id="step-linkedin">
+      <div class="step-indicator">
+        <div class="step-dot"></div>
+      </div>
+      Generating LinkedIn carousel
+    </div>
+    <div class="load-step" id="step-twitter">
+      <div class="step-indicator">
+        <div class="step-dot"></div>
+      </div>
+      Crafting Twitter/X thread
+    </div>
+    <div class="load-step" id="step-email">
+      <div class="step-indicator">
+        <div class="step-dot"></div>
+      </div>
+      Writing email newsletter
+    </div>
+    <div class="load-step" id="step-podcast">
+      <div class="step-indicator">
+        <div class="step-dot"></div>
+      </div>
+      Scripting podcast episode
+    </div>
+    <div class="load-step" id="step-instagram">
+      <div class="step-indicator">
+        <div class="step-dot"></div>
+      </div>
+      Creating Instagram captions
+    </div>
+  </div>
+</div>
+
+<!-- Toasts -->
+<div class="toast-container"></div>
+
+<!-- App -->
+<div class="app-wrapper">
+
+  <!-- Navbar -->
+  <nav class="navbar">
+    <a class="nav-logo" href="#">
+      <div class="logo-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="11" width="18" height="10" rx="2"/>
+          <circle cx="12" cy="5" r="2"/><path d="M12 7v4"/>
+          <circle cx="8" cy="16" r="1" fill="white" stroke="none"/>
+          <circle cx="16" cy="16" r="1" fill="white" stroke="none"/>
+        </svg>
+      </div>
+      <span class="logo-text">RepurposeBot</span>
+    </a>
+    <div style="display:flex;align-items:center;gap:10px;">
+      <button class="btn-secondary" id="library-btn" onclick="toggleLibrary()" style="display:flex;align-items:center;gap:6px;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+        Library
+      </button>
+      <div class="nav-badge">
+        <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+        </svg>
+        AI-Powered
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="hero-eyebrow">
+      <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/>
+        <polyline points="17 6 23 6 23 12"/>
+      </svg>
+      AI-Powered Content Repurposing
+    </div>
+    <h1>One Article.<br><span class="gradient-text">Five Powerful Formats.</span></h1>
+    <p>Paste a URL or upload any article. RepurposeBot analyzes the tone, extracts key insights, and auto-generates platform-ready content in seconds.</p>
+
+    <div class="feature-pills">
+      <div class="pill">
+        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
+        LinkedIn Carousel
+      </div>
+      <div class="pill">
+        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4l16 16M4 20L20 4"/><path d="M20 4h-5l-11 16h5"/></svg>
+        Twitter Thread
+      </div>
+      <div class="pill">
+        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+        Email Newsletter
+      </div>
+      <div class="pill">
+        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+        Podcast Script
+      </div>
+      <div class="pill">
+        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+        Instagram Captions
+      </div>
+    </div>
+  </section>
+
+  <!-- Input Section -->
+  <section class="input-section">
+    <div class="input-card">
+
+      <!-- Tabs -->
+      <div class="input-tabs">
+        <button class="input-tab active" data-tab="url">
+          <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+          Paste URL
+        </button>
+        <button class="input-tab" data-tab="file">
+          <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          Upload File
+        </button>
+        <button class="input-tab" data-tab="text">
+          <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          Paste Text
+        </button>
+      </div>
+
+      <!-- URL Panel -->
+      <div class="tab-panel active" id="panel-url">
+        <div class="url-input-wrapper">
+          <span class="url-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+          </span>
+          <input type="url" id="url-input" placeholder="https://yourblog.com/your-article" autocomplete="off" spellcheck="false" />
+        </div>
+        <div class="input-hint">Works with Medium, Substack, WordPress, HubSpot, and most article pages</div>
+      </div>
+
+      <!-- File Panel -->
+      <div class="tab-panel" id="panel-file">
+        <div class="file-drop-zone">
+          <input type="file" id="file-input" accept=".txt,.md,.html,.htm,.pdf" />
+          <div class="drop-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="16 16 12 12 8 16"/>
+              <line x1="12" y1="12" x2="12" y2="21"/>
+              <path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/>
+            </svg>
+          </div>
+          <div class="drop-title" id="drop-label">Drop your file here or click to browse</div>
+          <div class="drop-sub">Supports .txt, .md, .html, .pdf — Max 10 MB</div>
+        </div>
+      </div>
+
+      <!-- Text Panel -->
+      <div class="tab-panel" id="panel-text">
+        <textarea id="text-input" placeholder="Paste your full article text here (minimum 100 characters)..."></textarea>
+        <div class="input-meta">
+          <span id="char-count">0 characters</span>
+          <span>Minimum 100 characters required</span>
+        </div>
+      </div>
+
+      <!-- Tone Override -->
+      <div class="tone-section">
+        <div class="tone-label">
+          <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg>
+          Tone Override
+          <span style="font-weight:400;color:var(--text-muted);font-size:11px;text-transform:none;letter-spacing:0;">(auto-detected by default)</span>
+        </div>
+        <div class="tone-options">
+          <button class="tone-btn active" data-tone="auto">Auto-Detect</button>
+          <button class="tone-btn" data-tone="professional">Professional</button>
+          <button class="tone-btn" data-tone="casual">Casual</button>
+          <button class="tone-btn" data-tone="inspirational">Inspirational</button>
+          <button class="tone-btn" data-tone="educational">Educational</button>
+          <button class="tone-btn" data-tone="conversational">Conversational</button>
+        </div>
+      </div>
+
+      <!-- Submit -->
+      <button class="submit-btn" id="submit-btn">
+        <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+        </svg>
+        Repurpose My Content
+      </button>
+    </div>
+
+    <!-- Trust strip -->
+    <div class="trust-strip">
+      <div class="trust-item">
+        <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+        AI-powered generation
+      </div>
+      <div class="trust-item">
+        <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+        Tone-matched outputs
+      </div>
+      <div class="trust-item">
+        <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        One-click copy per format
+      </div>
+    </div>
+  </section>
+
+  <!-- Results Section -->
+  <section id="results-section">
+
+    <div class="results-header">
+      <div>
+        <div class="results-title">Your Content Is Ready</div>
+        <div class="results-meta" id="results-meta"></div>
+      </div>
+      <div class="results-actions">
+        <button class="btn-secondary" id="new-content-btn">
+          <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+          New Article
+        </button>
+        <button class="btn-secondary" onclick="downloadAll()">
+          <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Download All
+        </button>
+      </div>
+    </div>
+
+    <!-- Output Tabs Nav -->
+    <div class="output-tabs-nav">
+      <button class="output-tab-btn active" data-output="linkedin">
+        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
+        LinkedIn Carousel
+      </button>
+      <button class="output-tab-btn" data-output="twitter">
+        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4l16 16M4 20L20 4"/><path d="M20 4h-5l-11 16h5"/></svg>
+        Twitter Thread
+      </button>
+      <button class="output-tab-btn" data-output="email">
+        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+        Email Newsletter
+      </button>
+      <button class="output-tab-btn" data-output="podcast">
+        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+        Podcast Script
+      </button>
+      <button class="output-tab-btn" data-output="instagram">
+        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+        Instagram
+      </button>
+    </div>
+
+    <!-- Output Panels -->
+    <div class="output-panel active" id="panel-linkedin"><div id="linkedin-output"></div></div>
+    <div class="output-panel" id="panel-twitter"><div id="twitter-output"></div></div>
+    <div class="output-panel" id="panel-email"><div id="email-output"></div></div>
+    <div class="output-panel" id="panel-podcast"><div id="podcast-output"></div></div>
+    <div class="output-panel" id="panel-instagram"><div id="instagram-output"></div></div>
+
+  </section>
+
+  <!-- File Library Section -->
+  <section id="library-section" class="hidden">
+    <div class="results-header">
+      <div>
+        <div class="results-title">File Library</div>
+        <div class="results-meta" style="margin-top:4px;">Previously generated content packages</div>
+      </div>
+      <div class="results-actions">
+        <button class="btn-secondary" onclick="toggleLibrary()">
+          <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+          Back
+        </button>
+      </div>
+    </div>
+    <div id="library-list"></div>
+  </section>
+
+  <!-- Footer -->
+  <footer style="text-align:center;padding:36px 24px;border-top:1px solid var(--border);color:var(--text-muted);font-size:12px;">
+    <div style="display:inline-flex;align-items:center;gap:8px;margin-bottom:6px;color:var(--text-secondary);font-weight:600;font-size:14px;">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8b5cf6" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4"/><circle cx="8" cy="16" r="1" fill="#8b5cf6" stroke="none"/><circle cx="16" cy="16" r="1" fill="#8b5cf6" stroke="none"/></svg>
+      RepurposeBot
+    </div>
+    <div>Turn any article into 5 platform-ready content formats instantly.</div>
+  </footer>
+
+</div><!-- end app-wrapper -->
+
+<script src="engine.js"></script>
+<script src="app.js"></script>
+<script>
+function downloadAll() {
+  if (!window.State || !State.results) { showToast('No content to download yet', 'error'); return; }
+  const r = State.results;
+  const parts = [];
+  parts.push('REPURPOSEBOT — COMPLETE CONTENT PACKAGE\nGenerated: ' + new Date().toLocaleString() + '\n\n');
+  parts.push('═'.repeat(50) + '\nLINKEDIN CAROUSEL\n' + '═'.repeat(50) + '\n');
+  r.linkedin.forEach(s => parts.push('[Slide ' + s.slideNum + ']\n' + (s.title||'') + '\n' + (s.body||'') + '\n\n'));
+  parts.push('═'.repeat(50) + '\nTWITTER / X THREAD\n' + '═'.repeat(50) + '\n');
+  r.twitter.forEach((t,i) => parts.push('Tweet ' + (i+1) + ':\n' + t.text + '\n\n'));
+  parts.push('═'.repeat(50) + '\nEMAIL NEWSLETTER\n' + '═'.repeat(50) + '\n');
+  const e = r.email;
+  parts.push('Subject: ' + e.subject + '\n\n' + e.greeting + '\n\n' + e.intro + '\n\nKey Takeaways:\n' + e.mainInsights.map(i=>'• '+i).join('\n') + '\n\nCTA: ' + e.cta + '\n\n');
+  parts.push('═'.repeat(50) + '\nPODCAST SCRIPT\n' + '═'.repeat(50) + '\n');
+  r.podcast.segments.forEach(s => parts.push(s.label + ' (~' + s.duration + ')\n' + s.text + '\n\n'));
+  parts.push('═'.repeat(50) + '\nINSTAGRAM CAPTIONS\n' + '═'.repeat(50) + '\n');
+  r.instagram.forEach((c,i) => parts.push('Variant ' + (i+1) + ' — ' + c.style + ':\n' + c.text + '\n\n'));
+  downloadText('RepurposeBot_Content_' + Date.now() + '.txt', parts.join(''));
+}
+</script>
+
+</body>
+</html>
